@@ -20,7 +20,7 @@ var logger = log4js.getLogger( 'default' );
 
 app.use( express.Router() );
 
-api.all( '/*', function( req, res, next ){
+app.all( '/*', function( req, res, next ){
   res.setHeader( 'Access-Control-Allow-Origin', '*' );
   res.setHeader( 'Access-Control-Allow-Methods', '*' );
   res.setHeader( 'Access-Control-Allow-Headers', '*' );
@@ -41,15 +41,18 @@ app.get( '/', function( req, res ){
     ip = req.socket.remoteAddress;
   }
 
-  var repid = '';
-  if( req.query && req.query.repid ){
-    repid = req.query.repid;
+  var queries = [];
+  if( req.query ){
+    Object.keys( req.query ).forEach( function( key ){
+      var value = ( req.query )[key];
+      queries.push( key + '=' + value );
+    });
   }
 
-  if( repid ){
-    logger.trace( 'IP: ' + ip + ', ReplicaID = ' + repid );
+  if( queries && queries.length ){
+    logger.info( 'IP: ' + ip + ', Query: ' + queries.join( ',' ) );
   }else{
-    logger.warn( 'IP: ' + ip + ', ReplicaID = ' + repid );
+    logger.trace( 'IP: ' + ip );
   }
 
   res.contentType( 'application/json; charset=utf-8' );
